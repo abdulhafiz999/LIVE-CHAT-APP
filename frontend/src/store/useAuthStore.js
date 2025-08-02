@@ -6,7 +6,7 @@ import { io } from "socket.io-client";
 const BASE_URL =
   import.meta.env.MODE === "development"
     ? "http://localhost:5002"
-    : import.meta.env.VITE_API_URL;
+    : "https://live-chat-app-2-hctt.onrender.com";
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
@@ -85,7 +85,7 @@ export const useAuthStore = create((set, get) => ({
       set({ isUpdatingProfile: false });
     }
   },
- 
+
   connectSocket: () => {
     const { authUser } = get();
     if (!authUser || get().socket?.connected) return;
@@ -94,6 +94,7 @@ export const useAuthStore = create((set, get) => ({
       query: {
         userId: authUser._id,
       },
+      withCredentials: true,
     });
     socket.connect();
 
@@ -101,6 +102,10 @@ export const useAuthStore = create((set, get) => ({
 
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
+    });
+
+    socket.on("connect_error", (error) => {
+      console.log("Socket connection error:", error);
     });
   },
   disconnectSocket: () => {
